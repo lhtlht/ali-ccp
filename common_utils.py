@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import os
 def reduce_mem_usage(df, verbose=True):
     numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
     start_mem = df.memory_usage().sum() / 1024**2
@@ -28,3 +28,18 @@ def reduce_mem_usage(df, verbose=True):
     end_mem = df.memory_usage().sum() / 1024**2
     if verbose: print('Mem. usage decreased to {:5.2f} Mb ({:.1f}% reduction)'.format(end_mem, 100 * (start_mem - end_mem) / start_mem))
     #return df
+
+def split_file(data, size, output, name):
+    if os.path.exists(output):
+        os.removedirs(output)
+        os.mkdir(output)
+    else:
+        os.mkdir(output)
+    n = data.shape[0]
+    s = n//size + 1
+    assert data.index.min != 0 or data.index.max != n-1, f"input data range error, {data.index} not match 0-{n-1}"
+    for i in range(size):
+        data.iloc[s*i:s*(i+1)].to_pickle(f"{output}/{name}_{i}.pkl")
+
+
+
